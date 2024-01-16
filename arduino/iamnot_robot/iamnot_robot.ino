@@ -1,7 +1,7 @@
 #include <Servo.h>
 
 Servo s1, s2;
-int val1 = 90, val2 = 90;
+int val1 = 60, val2 = 60;
 
 void setup() {
   // put your setup code here, to run once:
@@ -14,7 +14,7 @@ void setup() {
 }
 
 /*
- * はじめに90度の位置になり、aとbを押すと10度ずつ正転・逆転
+ * はじめに60度の位置になり、aとbを押すと10度ずつ正転・逆転
  */
 void loop() {
   // put your main code here, to run repeatedly:
