@@ -1,20 +1,17 @@
 import cv2
 import serial
 import time
-
-# クリック座標を格納する変数
-clicked_x = -1
-clicked_y = -1
-
-# マウスクリックイベントハンドラ
-def on_mouse_click(event, x, y, flags, param):
-    global clicked_x, clicked_y
-    if event == cv2.EVENT_LBUTTONDOWN:
-        clicked_x, clicked_y = x, y
-        print(f"クリックされた座標: x={clicked_x}, y={1000-clicked_y}")
+import math
+from pygame import mixer
 
 def posToDegree(pos):
-    return int(45/1000*pos + 30)
+    new_pos = pos -850
+    return int(34*math.exp(9.26E-04*new_pos))
+
+def play_sound(file_path):
+    mixer.init()
+    mixer.music.load(file_path)
+    mixer.music.play(loops=-1)
 
 def main():
     # テンプレート画像の読み込み
@@ -25,10 +22,12 @@ def main():
     
     # フレームレートを設定（10fps）
     cap.set(cv2.CAP_PROP_FPS, 10)
-    
-    # ウィンドウにマウスクリックイベントハンドラを設定
+        
     cv2.namedWindow('Template Matching')
-    cv2.setMouseCallback('Template Matching', on_mouse_click)
+
+    # Arduinoのシリアルポートを開く
+    ser = serial.Serial('/dev/cu.usbmodem2201', 9600)
+    time.sleep(2) # Arduinoがリセットされるのを待つ
 
     # クロップするサイズを設定
     crop_width = 800
@@ -59,18 +58,32 @@ def main():
         # 枠の中心位置からサーボの角度を計算
         center_y = crop_height - top_left[1] + h // 2
         degree = posToDegree(center_y)
-        #print("center_y: " + str(center_y) + ", degree: " + str(degree))
+        print("center_y: " + str(center_y) + ", degree: " + str(degree))
+
+        # サーボの角度をArduinoに送信
+        #data = str(degree) + "," + str(degree)
+        #ser.write(str(data).encode())
     
         # 結果をウィンドウに表示
         cv2.imshow('Template Matching', cropped_frame)
     
         # 'q' キーが押されたらループを終了
         if cv2.waitKey(1) & 0xFF == ord('q'):
+            # サウンドを再生
+            sound_file = "imnotrobot.mp3"
+            play_sound(sound_file)
+            time.sleep(2)
+
+            # サーボの角度をArduinoに送信
+            data = str(degree) + "," + str(degree)
+            ser.write(str(data).encode())
             break
-    
+
     # カメラとウィンドウをクリーンアップ
     cap.release()
     cv2.destroyAllWindows()
+
+    time.sleep(10)
 
 if __name__ == '__main__':
     main()  

@@ -11,7 +11,7 @@
 #define MOTOR_PWM_VAL 200
 
 int switch_r = 0, switch_l = 0;
-int pre_switch_r = 0      , pre_switch_l = 0;
+int pre_switch_r = 0, pre_switch_l = 0;
 
 int status = ROTATE;
 
